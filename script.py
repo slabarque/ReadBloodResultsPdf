@@ -12,6 +12,8 @@
 # Het csv bestand komt in outputDir terecht                                                                                 #
 # De grafiek met parameters word full screen geopend                                                                        #
 #                                                                                                                           #
+# De data die uit de pdf bestanden komt is niet altijd even consequent. Als daar problemen mee zijn 
+# (bvb: "Unknown row pattern") dan kan een aanpassing in clean_row nodig zijn.                                                                                                                         #
 #############################################################################################################################
 
 # Deze waarden kunnen worden aangepast
@@ -25,7 +27,7 @@ events = [('2025-05-16' , 'g'   , '--'     ,'Ongeval'),
           ]
 
 
-# Script
+# Script. Here be dragons. Do not touch, unless you know what you're doing ;-)
 import camelot
 import pandas as pd
 import matplotlib.pylab as pl
@@ -64,14 +66,29 @@ def get_rows_with_date(fileInfo):
         return p
     return list(map(prepend(date), get_relevant_rows(pdfFile)))
 
-def clean_row(row):
-    if(len(row[4])==0 and len(row)==7):
-        row.pop(4)
-    if(len(row[2]) == 0 or row[2]=="*"):
-        row.pop(2)
-    else:
-        row.pop(3)
-    return row
+def clean_row(row, shouldLog=False):
+    def log(msg):
+        if(shouldLog):
+            print(msg)
+    log(row)
+    match row:
+        case [date,name,outsideminmax,value,minmax,unit] if (outsideminmax == "" or outsideminmax =="*"):
+            result = [date,name,value,minmax,unit]
+            log("*****[date,name,outsideminmax,value,minmax,unit]*****")
+            return result
+        case [date,name,outsideminmax,value,empty,minmax,unit] if (outsideminmax == "" or outsideminmax =="*") and empty == "":
+            result = [date,name,value,minmax,unit]
+            log("+++++[date,name,outsideminmax,value,empty,minmax,unit]+++++")
+        case [date,name,value,empty, empty2,unit] if empty == "" and empty2 == "":
+            result = [date,name,value,empty,unit]
+            log(":::::[date,name,value,empty, empty2,unit]:::::")
+        case [date,name,value,minmax,unit]:
+            result = [date,name,value,minmax,unit]
+            log("<<<<<[date,name,value,minmax,unit]>>>>>")
+        case _:
+            raise Exception("Unknown row pattern")
+    log(result)
+    return result
 
 def clean_data(row):
     row[0] = datetime.strftime(datetime.strptime(row[0], "%Y%m%d"),"%Y-%m-%d")
@@ -90,21 +107,24 @@ def clean_data(row):
 def pad_row(row):
     return list(map(lambda t: f"{t[1]:<15}" if t[0]!=1 else f"{t[1]:<30}", enumerate(row)))
 
-def get_data(directory):
+def get_data(directory, shouldClean=True, shouldLog=False):
     mapToFileInfos = f.partial(map, build_file_path(directory))
     mapToTables = f.partial(map, get_rows_with_date)
-    cleanRows = f.partial(map, clean_row)
+    clean_row_logged = f.partial(clean_row, shouldLog=shouldLog)
+    cleanRows = f.partial(map, clean_row_logged)
     cleanData = f.partial(map, clean_data)
     flattenRows = lambda tables : [row for rows in tables for row in rows]
-    allRows = cleanData(cleanRows(flattenRows(mapToTables(mapToFileInfos(os.listdir(directory))))))
+    allRows = flattenRows(mapToTables(mapToFileInfos(os.listdir(directory))))
+    if(shouldClean):
+        allRows = cleanData(cleanRows(allRows))
     return allRows
 
-# def write_to_csv(data, directory, filename, shouldPad):
-#     padRows = f.partial(map, pad_row)
-#     rows = padRows(data) if shouldPad else data
-#     outputFile = open(os.path.join(directory,filename), "w", encoding="utf-16")
-#     outputFile.writelines(list(map(lambda row : f"{row},\n".replace("[","").replace("]",""), rows)))
-#     outputFile.close()
+def write_to_csv(data, directory, filename, shouldPad):
+    padRows = f.partial(map, pad_row)
+    rows = padRows(data) if shouldPad else data
+    outputFile = open(os.path.join(directory,filename), "w", encoding="utf-16")
+    outputFile.writelines(list(map(lambda row : f"{row},\n".replace("[","").replace("]",""), rows)))
+    outputFile.close()
 
 # def write_dataframe_to_csv(data:pd.DataFrame, directory, filename):
 #     outputFile = open(os.path.join(directory,filename), "w", encoding="utf-16")
@@ -166,6 +186,8 @@ def plot(events, *labels):
     plt.show()
 
 
+# rawdata = get_data(inputDir, False)
+# write_to_csv(data, outputDir, "rawData.csv", True)
 data = get_data(inputDir)
 df = get_dataframe(data)
 write_dataframe_to_csv(df, outputDir, "data.csv")
