@@ -37,6 +37,7 @@ from datetime import datetime
 import re
 import numpy as np
 import functools as f
+from math import isnan
 
 def get_date(fileName):
     fileDateRegex = r"\d{8}"
@@ -145,31 +146,37 @@ def get_dataframe(data):
     return df
 
 def plot(events, *labels):
-    colors = pl.cm.jet(np.linspace(0,1,len(labels)))
+    def get_colors(count):
+        return pl.cm.jet(np.linspace(0,1,count))
+    
+    colors = get_colors(len(labels))
     fig, ax1 = plt.subplots(figsize=(13,8))
-    handles = list()
+    handles = list[list[plt.Line2D]]()
     rightAxes = list[plt.Axes]()
-    for key, color in zip(labels, range(len(labels))):
+    for index, key in enumerate(labels):
         subset = df.loc[df['name']==key]
         data_x = subset['date']
         data_y = subset['value']
         data_min = subset['min']
         data_max = subset['max']
+        min = data_min.values[0]
+        max = data_max.values[0]
+        label = f"{key}{f" ({min}-{max})" if not isnan(min) and not isnan(max) else ""}"
         unit = subset['unit'].values[0]
-        handles.append(ax1.plot(data_x, data_y, color=colors[color], label=key))
-        ax1.plot(data_x, data_min, ':', color=colors[color])
-        ax1.plot(data_x, data_max, '-.', color=colors[color])
+        handles.append(ax1.plot(data_x, data_y, color=colors[index], label=label))
+        ax1.plot(data_x, data_min, ':', color=colors[index])
+        ax1.plot(data_x, data_max, '-.', color=colors[index])
         ax1.set_ylabel(unit)
-        if(color > 1):
-            ax1.spines['right'].set_position(('outward', (color-1) * 40))
-            ax1.spines['right'].set_color(colors[color])
+        if(index > 1):
+            ax1.spines['right'].set_position(('outward', (index-1) * 40))
+            ax1.spines['right'].set_color(colors[index])
             rightAxes.append(ax1)
-        elif (color == 1):
-            ax1.spines['right'].set_color(colors[color])
+        elif (index == 1):
+            ax1.spines['right'].set_color(colors[index])
             rightAxes.append(ax1)
-        elif (color == 0):
-            ax1.spines['left'].set_color(colors[color])
-        if(color<len(labels)-1):
+        elif (index == 0):
+            ax1.spines['left'].set_color(colors[index])
+        if(index<len(labels)-1):
             ax1 = ax1.twinx()
 
     for ax in rightAxes:
