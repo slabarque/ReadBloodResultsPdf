@@ -5,5 +5,8 @@ De output is een data.csv bestand en een grafiek die enkele parameters plot ifv 
 - In de events array kunnen gebeurtenissen worden toegevoegd die in de grafiek worden weergegeven
 Meer info over kleur en lijntypes: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
 - Het csv bestand komt in outputDir terecht
-- De grafiek met parameters word full screen geopend
+- De grafiek met parameters wordt full screen geopend
+
 ![Bloedwaarden](img/Bloedwaarden.png)
+
+*De data die uit de pdf bestanden komt is niet altijd even consequent. Als daar problemen mee zijn (bvb: "Unknown row pattern") dan kan een aanpassing in clean_row nodig zijn*
