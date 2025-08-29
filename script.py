@@ -80,9 +80,12 @@ def clean_row(row, shouldLog=False):
         case [date,name,outsideminmax,value,empty,minmax,unit] if (outsideminmax == "" or outsideminmax =="*") and empty == "":
             result = [date,name,value,minmax,unit]
             log("+++++[date,name,outsideminmax,value,empty,minmax,unit]+++++")
-        case [date,name,value,empty, empty2,unit] if empty == "" and empty2 == "":
+        case [date,name,value,empty,empty2,unit] if empty == "" and empty2 == "":
             result = [date,name,value,empty,unit]
-            log(":::::[date,name,value,empty, empty2,unit]:::::")
+            log(":::::[date,name,value,empty,empty2,unit]:::::")
+        case [date,name,value,empty,minmax,unit] if empty == "":
+            result = [date,name,value,minmax,unit]
+            log("=====[date,name,value,empty,minmax,unit]=====")
         case [date,name,value,minmax,unit]:
             result = [date,name,value,minmax,unit]
             log("<<<<<[date,name,value,minmax,unit]>>>>>")
