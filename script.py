@@ -89,6 +89,9 @@ def clean_row(row, shouldLog=False):
         case [date,name,value,minmax,unit]:
             result = [date,name,value,minmax,unit]
             log("<<<<<[date,name,value,minmax,unit]>>>>>")
+        case [date,emptyorcaret,name,outsideminmax,value,minmax,unit] if (emptyorcaret == "" or emptyorcaret == "^") and (outsideminmax == "" or outsideminmax =="*"):
+            result = [date,name,value,minmax,unit]
+            log("?????[date,emptyorcaret,name,outsideminmax,value]?????")
         case _:
             raise Exception("Unknown row pattern")
     log(result)
@@ -136,7 +139,7 @@ def write_to_csv(data, directory, filename, shouldPad):
 #     outputFile.close()
 
 def write_dataframe_to_csv(data:pd.DataFrame, directory, filename):
-    df.to_csv(os.path.join(directory, filename), encoding="utf-16")
+    data.to_csv(os.path.join(directory, filename), encoding="utf-16")
 
 def get_dataframe(data):
     df = pd.DataFrame(data, columns=["date","name","value","min","max","unit"])
@@ -148,7 +151,7 @@ def get_dataframe(data):
     names = df["name"].unique()
     return df
 
-def plot(events, *labels):
+def plot(dataFrame, events, *labels):
     def get_colors(count):
         return pl.cm.jet(np.linspace(0,1,count))
     
@@ -157,7 +160,7 @@ def plot(events, *labels):
     handles = list[list[plt.Line2D]]()
     rightAxes = list[plt.Axes]()
     for index, key in enumerate(labels):
-        subset = df.loc[df['name']==key]
+        subset = dataFrame.loc[dataFrame['name']==key]
         data_x = subset['date']
         data_y = subset['value']
         data_min = subset['min']
@@ -197,8 +200,8 @@ def plot(events, *labels):
 
 
 # rawdata = get_data(inputDir, False)
-# write_to_csv(data, outputDir, "rawData.csv", True)
+# write_to_csv(rawdata, outputDir, "rawData.csv", True)
 data = get_data(inputDir)
-df = get_dataframe(data)
-write_dataframe_to_csv(df, outputDir, "data.csv")
-plot(events, *parameters)
+dfr = get_dataframe(data)
+write_dataframe_to_csv(dfr, outputDir, "data.csv")
+plot(dfr, events, *parameters)
