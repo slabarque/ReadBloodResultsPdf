@@ -1,12 +1,12 @@
-Dit python script leest pdf bestanden (in het formaat van Jan Palfijn ziekenhuis) met resultaten van bloedonderzoeken in.
-De output is een data.csv bestand en een grafiek die enkele parameters plot ifv de tijd.
-- Plaats de bestanden in inputDir. Voorbeeld bestandsnaam: *Naam-Voornaam-20250822-AZ_Jan_Palfijn_Gent-0_A_68813785_5.pdf*
-- Plaats de gewenste parameters in parameters array
-- In de events array kunnen gebeurtenissen worden toegevoegd die in de grafiek worden weergegeven
-Meer info over kleur en lijntypes: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
-- Het csv bestand komt in outputDir terecht
-- De grafiek met parameters wordt full screen geopend
+This Python script reads PDF files (in the Jan Palfijn Hospital format) containing blood test results.
+The output is a data.csv file and a graph that plots several parameters over time.
+- Place the files in the input directory. Example file name: *LastName-FirstName-20250822-AZ_Jan_Palfijn_Gent-0_A_68813785_5.pdf*
+- Place the desired parameters in the parameters array.
+- Events can be added to the events array to be displayed in the graph.
+More information about color and line types: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
+- The CSV file is placed in the output directory.
+- The graph with parameters opens full screen.
 
 ![Bloedwaarden](img/Bloedwaarden.png)
 
-*De data die uit de pdf bestanden komt is niet altijd even consequent. Als daar problemen mee zijn (bvb: "Unknown row pattern") dan kan een aanpassing in clean_row nodig zijn*
+*The data extracted from the PDF files is not always consistent. If there are any problems with this (e.g. "Unknown row pattern") then an adjustment in clean_row may be necessary. The --verbose flag might help identifying the row that caused problems.*
