@@ -248,7 +248,7 @@ def plot(dataFrame, events, *labels):
     handles.append(list(map(lambda e: plt.axvline(x=pd.to_datetime(e[0]), color=e[1], linestyle=e[2], label=e[3]), events)))
     ax1.legend(handles=f.reduce(lambda x1, x2:x1 + x2, handles), loc="upper center")
 
-    plt.subplots_adjust(left=0.04, bottom=0.25, right=0.65, top=0.98)
+    plt.subplots_adjust(left=0.04, bottom=0.52, right=0.41, top=0.98)
     figManager = plt.get_current_fig_manager()
     figManager.set_window_title('Bloedwaarden')
     figManager.full_screen_toggle()
