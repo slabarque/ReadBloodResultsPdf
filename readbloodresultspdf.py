@@ -110,10 +110,16 @@ def get_table_rows(pdfFile):
     tables = camelot.read_pdf(pdfFile, flavor='stream', table_areas=['29,44,563,591'])
     return [row for row in tables[0].data[1:]]#skip the title column
 
+def get_table_rows_labo_nuytinck(pdfFile):
+    tables = camelot.read_pdf(pdfFile, flavor='stream', table_areas=['10,44,583,632'])
+    return [row for row in tables[0].data[1:]]#skip the title column
+
 def is_relevant_row(row):
     return len(list(filter(lambda val:len(val)>0, row)))>=4 or len(row[len(row)-1]) > 0
 
 def get_relevant_rows(pdfFile):
+    if "Labo_Nuytinck" in pdfFile:
+        return [x for x in filter(is_relevant_row, get_table_rows_labo_nuytinck(pdfFile))]
     return [x for x in filter(is_relevant_row, get_table_rows(pdfFile))]
 
 def get_rows_with_date(fileInfo):
@@ -127,10 +133,9 @@ def get_rows_with_date(fileInfo):
 def clean_row(row):
     log(row)
     match row:
-        case [date,name,outsideminmax,value,minmax,unit] if (outsideminmax == "" or outsideminmax =="*"):
+        case [date,name,outsideminmax,value,minmax,unit] if (outsideminmax == "" or outsideminmax =="*" or outsideminmax =="L" or outsideminmax =="H"):
             result = [date,name,value,minmax,unit]
             log("*****[date,name,outsideminmax,value,minmax,unit]*****")
-            return result
         case [date,name,outsideminmax,value,empty,minmax,unit] if (outsideminmax == "" or outsideminmax =="*") and empty == "":
             result = [date,name,value,minmax,unit]
             log("+++++[date,name,outsideminmax,value,empty,minmax,unit]+++++")
