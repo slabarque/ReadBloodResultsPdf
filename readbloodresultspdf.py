@@ -79,10 +79,6 @@ parameters = args.parameters
 events = args.events or []
 shouldLog = args.verbose
 
-def log(msg):
-    if(shouldLog):
-        print(msg)
-
 print("INPUT:")
 print(inputDir)
 print("OUTPUT:")
